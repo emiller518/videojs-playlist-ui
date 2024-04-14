@@ -36,7 +36,8 @@
     "url": "https://github.com/videojs/videojs-playlist-ui"
   },
   "dependencies": {
-    "global": "^4.4.0"
+    "global": "^4.4.0",
+    "videojs-playlist-ui": "git+https://github.com/emiller518/videojs-playlist-ui.git"
   },
   "devDependencies": {
     "conventional-changelog-cli": "^2.2.2",
