@@ -123,7 +123,7 @@ class PlaylistMenuItem extends Component {
 
     // Now playing
     const nowPlayingEl = document.createElement('span');
-    const nowPlayingText = this.localize('Now Playing');
+    const nowPlayingText = this.localize('Aaaaa');
 
     nowPlayingEl.className = 'vjs-playlist-now-playing-text';
     nowPlayingEl.appendChild(document.createTextNode(nowPlayingText));
