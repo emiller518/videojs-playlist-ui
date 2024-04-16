@@ -3,58 +3,14 @@ import videojs from 'video.js';
 
 const Component = videojs.getComponent('Component');
 
-const createThumbnail = function(thumbnail) {
-  if (!thumbnail) {
-    const placeholder = document.createElement('div');
+const createThumbnailPlaceholder = function() {
+  const placeholder = document.createElement('div');
 
-    placeholder.className = 'vjs-playlist-thumbnail vjs-playlist-thumbnail-placeholder';
-    return placeholder;
-  }
-
-  const picture = document.createElement('picture');
-
-  picture.className = 'vjs-playlist-thumbnail';
-
-  if (typeof thumbnail === 'string') {
-    // simple thumbnails
-    const img = document.createElement('img');
-
-    img.loading = 'lazy';
-    img.src = thumbnail;
-    img.alt = '';
-    picture.appendChild(img);
-  } else {
-    // responsive thumbnails
-
-    // additional variations of a <picture> are specified as
-    // <source> elements
-    for (let i = 0; i < thumbnail.length - 1; i++) {
-      const variant = thumbnail[i];
-      const source = document.createElement('source');
-
-      // transfer the properties of each variant onto a <source>
-      for (const prop in variant) {
-        source[prop] = variant[prop];
-      }
-      picture.appendChild(source);
-    }
-
-    // the default version of a <picture> is specified by an <img>
-    const variant = thumbnail[thumbnail.length - 1];
-    const img = document.createElement('img');
-
-    img.loading = 'lazy';
-    img.alt = '';
-    for (const prop in variant) {
-      img[prop] = variant[prop];
-    }
-    picture.appendChild(img);
-  }
-  return picture;
+  placeholder.className = 'vjs-playlist-thumbnail vjs-playlist-thumbnail-placeholder';
+  return placeholder;
 };
 
 class PlaylistMenuItem extends Component {
-
   constructor(player, playlistItem, settings) {
     if (!playlistItem.item) {
       throw new Error('Cannot construct a PlaylistMenuItem without an item option');
@@ -70,7 +26,6 @@ class PlaylistMenuItem extends Component {
 
     this.on(['click', 'tap'], this.switchPlaylistItem_);
     this.on('keydown', this.handleKeyDown_);
-
   }
 
   handleKeyDown_(event) {
@@ -82,16 +37,17 @@ class PlaylistMenuItem extends Component {
   }
 
   switchPlaylistItem_(event) {
-    this.player_.playlist.currentItem(this.player_.playlist().indexOf(this.item));
-    if (this.playOnSelect) {
-      this.player_.play();
+    if (!event.target.classList.contains('vjs-playlist-add-button')) {
+      this.player_.playlist.currentItem(this.player_.playlist().indexOf(this.item));
+      if (this.playOnSelect) {
+        this.player_.play();
+      }
     }
   }
 
   createEl() {
     const li = document.createElement('li');
     const item = this.options_.item;
-    const showDescription = this.options_.showDescription;
 
     if (typeof item.data === 'object') {
       const dataKeys = Object.keys(item.data);
@@ -106,67 +62,33 @@ class PlaylistMenuItem extends Component {
     li.className = 'vjs-playlist-item';
     li.setAttribute('tabIndex', 0);
 
-    // Thumbnail image
-    this.thumbnail = createThumbnail(item.thumbnail);
+    // Thumbnail placeholder
+    this.thumbnail = createThumbnailPlaceholder();
     li.appendChild(this.thumbnail);
-
-    // Duration
-    if (item.duration) {
-      const duration = document.createElement('time');
-      const time = videojs.time.formatTime(item.duration);
-
-      duration.className = 'vjs-playlist-duration';
-      duration.setAttribute('datetime', 'PT0H0M' + item.duration + 'S');
-      duration.appendChild(document.createTextNode(time));
-      li.appendChild(duration);
-    }
-
-    // Now playing
-    const nowPlayingEl = document.createElement('span');
-    const nowPlayingText = this.localize('Aaaaa');
-
-    nowPlayingEl.className = 'vjs-playlist-now-playing-text';
-    nowPlayingEl.appendChild(document.createTextNode(nowPlayingText));
-    nowPlayingEl.setAttribute('title', nowPlayingText);
-    this.thumbnail.appendChild(nowPlayingEl);
 
     // Title container contains title and "up next"
     const titleContainerEl = document.createElement('div');
 
-    titleContainerEl.className = 'vjs-playlist-title-container';
+    titleContainerEl.className = 'vjs-playlist-clip-container';
     this.thumbnail.appendChild(titleContainerEl);
-
-    // Up next
-    const upNextEl = document.createElement('span');
-    const upNextText = this.localize('Up Next');
-
-    upNextEl.className = 'vjs-up-next-text';
-    upNextEl.appendChild(document.createTextNode(upNextText));
-    upNextEl.setAttribute('title', upNextText);
-    titleContainerEl.appendChild(upNextEl);
 
     // Video title
     const titleEl = document.createElement('cite');
     const titleText = item.name || this.localize('Untitled Video');
 
-    titleEl.className = 'vjs-playlist-name';
+    titleEl.className = 'vjs-clip-name';
     titleEl.appendChild(document.createTextNode(titleText));
     titleEl.setAttribute('title', titleText);
     titleContainerEl.appendChild(titleEl);
 
-    // Populate thumbnails alt with the video title
-    this.thumbnail.getElementsByTagName('img').alt = titleText;
+    // Add button
+    const addButton = document.createElement('button');
+    const addButtonText = this.localize('Add');
 
-    // We add thumbnail video description only if specified in playlist options
-    if (showDescription) {
-      const descriptionEl = document.createElement('div');
-      const descriptionText = item.description || '';
-
-      descriptionEl.className = 'vjs-playlist-description';
-      descriptionEl.appendChild(document.createTextNode(descriptionText));
-      descriptionEl.setAttribute('title', descriptionText);
-      titleContainerEl.appendChild(descriptionEl);
-    }
+    addButton.className = 'vjs-playlist-add-button';
+    addButton.appendChild(document.createTextNode(addButtonText));
+    addButton.setAttribute('title', addButtonText);
+    titleEl.appendChild(addButton);
 
     return li;
   }
