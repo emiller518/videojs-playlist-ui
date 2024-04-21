@@ -81,6 +81,14 @@ class PlaylistMenuItem extends Component$1 {
     addButton.className = 'vjs-playlist-add-button';
     addButton.appendChild(document__default["default"].createTextNode(addButtonText));
     addButton.setAttribute('title', addButtonText);
+
+    // Attach click event listener to the button
+    addButton.addEventListener('click', () => {
+      // Emit a custom event with the clip data
+      this.player().trigger('add-clip', {
+        title: item.name
+      });
+    });
     titleEl.appendChild(addButton);
     return li;
   }
